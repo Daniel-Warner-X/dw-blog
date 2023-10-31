@@ -3,3 +3,10 @@ _site
 .jekyll-cache
 .jekyll-metadata
 vendor
+
+
+# AppMap artifacts
+/.appmap
+
+# Node modules
+/node_modules

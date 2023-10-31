@@ -1,0 +1,4 @@
+name: dw-blog
+packages: []
+language: ruby
+appmap_dir: tmp/appmap

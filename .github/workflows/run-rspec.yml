@@ -16,23 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-      with:
-        ref: ${{ github.event.pull_request.head.ref }}
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: '3.2'
         bundler-cache: true 
-    - name: Enable appmap gem update
-      run: bundle config unset deployment
-    - name: Install AppMap tools
-      id: install-appmap
-      uses: getappmap/install-action@v1
-      with:
-        project-type: bundler
-    - name: Commit changes
-      uses: EndBug/add-and-commit@v9
     - run: bundle exec rspec
-    - name: Archive AppMaps
-      uses: getappmap/archive-action@v1
-      with:
-       revision: ${{ github.event.pull_request.base.sha }}

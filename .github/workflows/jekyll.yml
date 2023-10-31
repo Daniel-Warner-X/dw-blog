@@ -1,4 +1,19 @@
-# This workflow uses actions that are not certified by GitHub.
+permissions:
+  # Read the baseline artifact in order to perform
+  # the AppMap comparison.
+  actions: read
+
+  # Commit the AppMap configuration.
+  # If the EndBug/add-and-commit is removed,
+  # this can be changed to 'read'.
+  contents: write
+
+  # Add check annotations to the source code when
+  # a problem is detected.
+  checks: write
+
+  # Add a comment to the pull request.
+  pull-requests: write# This workflow uses actions that are not certified by GitHub.
 # They are provided by a third-party and are governed by
 # separate terms of service, privacy policy, and support
 # documentation.
@@ -7,9 +22,21 @@
 name: Deploy Jekyll site to Pages
 
 on:
-  # Runs on pushes targeting the default branch
+
+  # Run on pull request, so that the PR can be analyzed.
+  pull_request:
+
+  # Run on merge to the base branch, so that the baseline
+  # AppMap archive can be brought up-to-date.
+  # If your base branch is not 'main', (e.g. 'master', 'develop'),
+  # change this accordingly.
   push:
-    branches: ["main"]
+    branches:
+      - main
+
+  # Run weekly, so that the baseline AppMap artifact does not expire.
+  schedule:
+    - cron: '0 0 * * 0'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -33,12 +60,29 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          # Checkout pull request head so that a commit can be made
+          ref: ${{ github.event.pull_request.head.ref }}
       - name: Setup Ruby
         uses: ruby/setup-ruby@55283cc23133118229fd3f97f9336ee23a179fcf # v1.146.0
         with:
           ruby-version: '3.1' # Not needed with a .ruby-version file
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
           cache-version: 0 # Increment this number if you need to re-download cached gems
+      # Begin install-action snippet
+      #
+      - name: Enable appmap gem update
+        run: bundle config unset deployment
+      - name: Install AppMap tools
+        id: install-appmap
+        uses: getappmap/install-action@v1
+        with:
+          project-type: bundler
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v9
+      #
+      # End install-action snippet
+
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v3
@@ -50,6 +94,10 @@ jobs:
       - name: Upload artifact
         # Automatically uploads an artifact from the './_site' directory by default
         uses: actions/upload-pages-artifact@v2
+      - name: Archive AppMaps
+        uses: getappmap/archive-action@v1
+        with:
+          revision: ${{ github.event.pull_request.base.sha }}
 
   # Deployment job
   deploy:

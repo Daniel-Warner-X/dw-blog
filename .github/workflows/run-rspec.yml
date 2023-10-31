@@ -1,5 +1,16 @@
 name: My workflow
-on: [push, pull_request]
+permissions:
+  actions: read
+  contents: write
+  checks: write
+  pull-requests: write
+on: 
+  pull_request:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 0 * * 0'
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -7,6 +18,23 @@ jobs:
     - uses: actions/checkout@v4
     - uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '3.2' # Not needed with a .ruby-version file
-        bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+        ruby-version: '3.2'
+        bundler-cache: true 
     - run: bundle exec rspec
+    - name: Save AppMaps
+      uses: actions/cache/save@v3
+      if: always()
+      with:
+        path: ./tmp/appmap
+        key: appmaps-${{ github.sha }}-${{ github.run_attempt }}
+
+  appmap-analysis:
+    if: always()
+    needs: [test] # You may need to change this to match
+                  # the name of the step that runs your tests.
+    uses: getappmap/analyze-action/.github/workflows/appmap-analysis.yml@v1
+    permissions:
+      actions: read
+      contents: read
+      checks: write
+      pull-requests: write

@@ -7,6 +7,7 @@ source "https://rubygems.org"
 #
 # This will help ensure the proper Jekyll version is running.
 # Happy Jekylling!
+
 gem 'appmap', :groups => [:development, :test]
 
 gem "jekyll", "~> 4.3.2"

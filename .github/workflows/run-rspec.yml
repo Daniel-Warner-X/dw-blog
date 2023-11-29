@@ -1,16 +1,16 @@
 name: My workflow
+on: 
+  push:
+    branches:
+      - main
+  pull_request:
+  schedule:
+    - cron: '0 0 * * 0'
 permissions:
   actions: read
   contents: write
   checks: write
   pull-requests: write
-on: 
-  pull_request:
-  push:
-    branches:
-      - main
-  schedule:
-    - cron: '0 0 * * 0'
 jobs:
   test:
     runs-on: ubuntu-latest

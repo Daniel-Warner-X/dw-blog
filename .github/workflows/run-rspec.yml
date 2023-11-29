@@ -37,6 +37,6 @@ jobs:
     uses: getappmap/analyze-action/.github/workflows/appmap-analysis.yml@v1
     permissions:
       actions: read
-      contents: read
+      contents: write
       checks: write
       pull-requests: write
